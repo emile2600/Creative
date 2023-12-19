@@ -2,6 +2,7 @@
 using Creative.Api.Exceptions;
 using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 
 namespace Creative.Api.Implementations.EntityFrameworkCore
 {
@@ -109,7 +110,14 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 				}
 				catch (InvalidOperationException)
 				{
-					DbContext.Entry(orignalObj).Reference(property.Name).CurrentValue = property.GetValue(obj);
+					try
+					{
+						DbContext.Entry(orignalObj).Reference(property.Name).CurrentValue = property.GetValue(obj);
+					}
+					catch(InvalidOperationException)
+					{
+						DbContext.Entry(orignalObj).Collection(property.Name).CurrentValue = (IEnumerable?)property.GetValue(obj);
+					}
 				}
 			}
 			await DbContext.SaveChangesAsync();
