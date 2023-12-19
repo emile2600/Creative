@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Api", "..\Amalia-Curacao\administration-application\Creative\Api\Creative.Api.csproj", "{2A6F6FB8-1BF5-4395-8F41-D07D87445EB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Api", "Api\Creative.Api.csproj", "{7530C071-E2C9-4A13-BCA8-43737930EEF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Database", "..\Amalia-Curacao\administration-application\Creative\Database\Creative.Database.csproj", "{35D37F8A-B4C4-4478-8AFD-849A6949EEA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Database", "Database\Creative.Database.csproj", "{E819A6BD-3754-4CDD-A14A-C8248265B3E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Specs", "..\Amalia-Curacao\administration-application\Creative\Specs\Creative.Specs.csproj", "{D76DC216-C01D-49B5-A862-1D3571DE849D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Specs", "Specs\Creative.Specs.csproj", "{616095FC-B9FF-4049-B1FE-E399419B6251}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2A6F6FB8-1BF5-4395-8F41-D07D87445EB5}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{2A6F6FB8-1BF5-4395-8F41-D07D87445EB5}.Debug|Any CPU.Build.0 = Release|Any CPU
-		{2A6F6FB8-1BF5-4395-8F41-D07D87445EB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A6F6FB8-1BF5-4395-8F41-D07D87445EB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35D37F8A-B4C4-4478-8AFD-849A6949EEA2}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{35D37F8A-B4C4-4478-8AFD-849A6949EEA2}.Debug|Any CPU.Build.0 = Release|Any CPU
-		{35D37F8A-B4C4-4478-8AFD-849A6949EEA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35D37F8A-B4C4-4478-8AFD-849A6949EEA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D76DC216-C01D-49B5-A862-1D3571DE849D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D76DC216-C01D-49B5-A862-1D3571DE849D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D76DC216-C01D-49B5-A862-1D3571DE849D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D76DC216-C01D-49B5-A862-1D3571DE849D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7530C071-E2C9-4A13-BCA8-43737930EEF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7530C071-E2C9-4A13-BCA8-43737930EEF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7530C071-E2C9-4A13-BCA8-43737930EEF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7530C071-E2C9-4A13-BCA8-43737930EEF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E819A6BD-3754-4CDD-A14A-C8248265B3E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E819A6BD-3754-4CDD-A14A-C8248265B3E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E819A6BD-3754-4CDD-A14A-C8248265B3E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E819A6BD-3754-4CDD-A14A-C8248265B3E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{616095FC-B9FF-4049-B1FE-E399419B6251}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{616095FC-B9FF-4049-B1FE-E399419B6251}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{616095FC-B9FF-4049-B1FE-E399419B6251}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{616095FC-B9FF-4049-B1FE-E399419B6251}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
