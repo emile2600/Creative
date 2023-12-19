@@ -94,7 +94,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		#endregion
 
 		#region Update
-		/// <inh
+		/// <inhertidoc/>
 		public async Task<T[]> Update(params T[] objs)
 		=> await Task.WhenAll(objs.Select(async obj => await Update(obj)));
 
