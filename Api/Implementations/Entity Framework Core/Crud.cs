@@ -52,45 +52,37 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		#endregion
 
 		#region Read
+
 		/// <summary> Gets all objects from the database. </summary>
-		/// <returns>All objects from the database.</returns>
-		public async Task<T[]> GetAll()
-		=> await DbContext.Set<T>().ToArrayAsync();
+		public async Task<T[]> Get() => await DbContext.Set<T>().ToArrayAsync();
 
 		/// <summary> Gets an object from the database by its primary key. </summary>
 		/// <param name="key">The primary key of the object to get.</param>
 		/// <returns>The object with the specified primary key, or null if it does not exist.</returns>
 		public async Task<T?> TryGet(HashSet<Key> key)
-		=> (await TryGet(new[] { key }))?.Single();
+		{
+			try
+			{
+				return await Get(key);
+			}
+			catch(ObjectNotFoundException)
+			{
+				return null;
+			}
+		}
 
 		/// <summary> Gets an object from the database by its primary key. </summary>
 		/// <param name="key">The primary key of the object to get.</param>
 		/// <returns>The object with the specified primary key.</returns>
 		/// <exception cref="ObjectNotFoundException">Thrown if the object with the specified primary key does not exist.</exception>
 		public async Task<T> Get(HashSet<Key> key)
-		=> (await Get(new[] { key })).SingleOrDefault() ?? throw new ObjectNotFoundException();
+		=> (await Get(obj => obj.GetPrimaryKey().SetEquals(key))).SingleOrDefault() ?? throw new ObjectNotFoundException();
 
 		/// <summary> Gets objects from the database by their primary keys. </summary>
-		/// <param name="keys">The primary keys of the objects to get.</param>
-		/// <returns>The objects with the specified primary keys, or null if one does not exist.</returns>
-		public async Task<T[]?> TryGet(params HashSet<Key>[] keys)
-		{
-			try
-			{
-				return await Get(keys);
-			}
-			catch (ObjectNotFoundException)
-			{
-				return null;
-			}
-		}
-
-		/// <summary> Gets objects from the database by their primary keys. </summary>
-		/// <param name="keys"> The primary keys of the objects to get. </param>
-		/// <returns> The objects with the specified primary keys. </returns>
-		/// <exception cref="ObjectNotFoundException"> Thrown if an object with one of the specified primary keys does not exist. </exception>
-		public async Task<T[]> Get(params HashSet<Key>[] keys)
-		=> await Task.WhenAll(keys.Select(async key => (await GetAll()).SingleOrDefault(obj => obj.GetPrimaryKey().Equals<Key>(key)) ?? throw new ObjectNotFoundException()));
+		/// <param name="filter">The function to filter the entities.</param>
+		/// <returns> The objects that fit the filter criteria. </returns>
+		public async Task<T[]> Get(Func<T, bool> filter)
+		=> await Task.FromResult(DbContext.Set<T>().Where(filter).ToArray());
 		#endregion
 
 		#region Update
@@ -136,9 +128,9 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		/// <returns>A boolean indicating whether the deletion was successful.</returns>
 		public async Task<bool> Delete(params HashSet<Key>[] keys)
 		{
-			var objs = await TryGet(keys);
+			var objs = await Task.WhenAll(keys.Select(TryGet));
 
-			if (objs == null)
+			if (objs is null || objs.Any(obj => obj is null))
 			{
 				return false;
 			}
