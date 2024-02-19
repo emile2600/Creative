@@ -151,7 +151,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 
 		#region Read
 		[Test]
-		public async Task GetAll_should_return_relations()
+		public async Task Get_should_return_all_objs()
 		{
 			// Arrange 
 			var model1 = new TestModel() { Id = 1, Name = "Test", OtherId = 2 };
@@ -160,29 +160,28 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 			await _dbContext.SaveChangesAsync();
 
 			// Act
-			var result = await _crud.GetAll();
-
-			// Assert
-			result.Should().HaveCount(2)
-				.And.ContainEquivalentOf(new TestModel() { Id = 1, Name = "Test", OtherId = 2, Other = model2 })
-				.And.ContainEquivalentOf(new TestModel() { Id = 2, Name = "Test", OtherId = 1, Other = model1 });
-		}
-
-		[Test]
-		public async Task GetAll_should_return_all_objects_in_the_database()
-		{
-			// Arrange
-			var model1 = new TestModel() { Id = 1, Name = "Test" };
-			var model2 = new TestModel() { Id = 2, Name = "Test" };
-			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2 });
-			await _dbContext.SaveChangesAsync();
-
-			// Act
-			var result = await _crud.GetAll();
+			var result = await _crud.Get();
 
 			// Assert
 			result.Should().HaveCount(2)
 				.And.ContainEquivalentOf(model1)
+				.And.ContainEquivalentOf(model2);
+		}
+
+		[Test]
+		public async Task Get_filter_return_filtered_objs()
+		{
+			// Arrange
+			var model1 = new TestModel() { Id = 1, Name = "Test1" };
+			var model2 = new TestModel() { Id = 2, Name = "Test2" };
+			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2 });
+			await _dbContext.SaveChangesAsync();
+
+			// Act
+			var result = await _crud.Get(obj => obj.Name!.Equals("Test2"));
+
+			// Assert
+			result.Should().HaveCount(1)
 				.And.ContainEquivalentOf(model2);
 		}
 
@@ -202,6 +201,23 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 			result.Should().BeEquivalentTo(model1);
 		}
 
+
+		[Test]
+		public async Task Get_should_return_np_object_ifno_object_fit_criteria()
+		{
+			// Arrange
+			var model1 = new TestModel() { Id = 1, Name = "Test" };
+			var model2 = new TestModel() { Id = 2, Name = "Test" };
+			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2 });
+			await _dbContext.SaveChangesAsync();
+
+			// Act
+			var result = await _crud.Get(obj => obj.Name!.Equals("NOT A VALID NAME"));
+
+			// Assert
+			result.Should().HaveCount(0);
+		}
+
 		[Test]
 		public async Task TryGet_should_return_object_with_primarykey()
 		{
@@ -219,7 +235,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		}
 
 		[Test]
-		public async Task Get_should_throw_ObjectNotFoundException_when_object_not_found()
+		public async Task Get_should_throw_ObjectNotFoundException_when_object_pk_can_not_be_found()
 		{
 			// Arrange
 			var model1 = new TestModel() { Id = 1, Name = "Test" };
@@ -235,7 +251,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		}
 
 		[Test]
-		public async Task TryGet_should_return_null_when_object_cant_be_found()
+		public async Task TryGet_should_return_null_when_no_object_with_requested_pk_can_be_found()
 		{
 			// Arrange
 			var model1 = new TestModel() { Id = 1, Name = "Test" };
@@ -251,16 +267,17 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		}
 
 		[Test]
-		public async Task Get_should_return_multiple_object_when_multiple_primary_key_are_passed()
+		public async Task Get_should_return_multiple_object_when_criteria_is_met()
 		{
 			// Arrange
 			var model1 = new TestModel() { Id = 1, Name = "Test" };
 			var model2 = new TestModel() { Id = 2, Name = "Test" };
-			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2 });
+			var model3 = new TestModel() { Id = 3, Name = "NOT A VALID NAME" };
+			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2, model3 });
 			await _dbContext.SaveChangesAsync();
 
 			// Act
-			var result = await _crud.Get(model1.GetPrimaryKey(), model2.GetPrimaryKey());
+			var result = await _crud.Get(obj => obj.Name!.Equals("Test"));
 
 			// Assert
 			result.Should().HaveCount(2)
@@ -269,16 +286,17 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		}
 
 		[Test]
-		public async Task TryGet_should_return_multiple_object_when_multiple_primary_key_are_passed()
+		public async Task TryGet_should_return_multiple_object_when_criteria_is_met()
 		{
 			// Arrange
 			var model1 = new TestModel() { Id = 1, Name = "Test" };
 			var model2 = new TestModel() { Id = 2, Name = "Test" };
-			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2 });
+			var model3 = new TestModel() { Id = 3, Name = "NOT A VALID NAME" };
+			await _dbContext.AddRangeAsync(new TestModel[] { model1, model2, model3 });
 			await _dbContext.SaveChangesAsync();
 
 			// Act
-			var result = await _crud.TryGet(model1.GetPrimaryKey(), model2.GetPrimaryKey());
+			var result = await _crud.Get(obj => obj.Name!.Equals("Test"));
 
 			// Assert
 			result.Should().HaveCount(2)
@@ -441,7 +459,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		}
 
 		[Test]
-		public async Task Delete_returns_falase_if_item_has_not_been_succesfully_deleted()
+		public async Task Delete_returns_false_if_item_has_not_been_succesfully_deleted()
 		{
 			// Arrange
 
