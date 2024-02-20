@@ -10,17 +10,16 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 	[TestFixture]
 	public class _Crud
 	{
-		private DbContextOptions<DbContext> _dbContextOptions;
 		private DbContext _dbContext;
 		private Crud<TestModel> _crud;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_dbContextOptions = new DbContextOptionsBuilder<DbContext>()
+			var dbContextOptions = new DbContextOptionsBuilder<DbContext>()
 			   .UseInMemoryDatabase(Guid.NewGuid().ToString())
 			   .Options;
-			_dbContext = new TestContext(_dbContextOptions);
+			_dbContext = new TestContext(dbContextOptions);
 			_crud = new Crud<TestModel>(_dbContext);
 		}
 
@@ -30,6 +29,48 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 			_dbContext.Database.EnsureDeleted();
 			_dbContext.Dispose();
 		}
+
+		#region Eager Loading 
+
+		[Test]
+		public async Task Constructor_should_eager_load_navigation_properties()
+		{
+			// Arrange
+			var tModel1 = new TestModel { Id = 1, Name = "Test", OtherId = 2 };
+			var tModel2 = new TestModel { Id = 2, Name = "Test", Other = tModel1, OtherId = 1 };
+			tModel1.Other = tModel2;
+			_dbContext.Add(tModel1);
+			_dbContext.Add(tModel2);
+			_dbContext.SaveChanges();
+
+			// Act
+			var crud = new Crud<TestModel>(_dbContext, (t) => t.Other!);
+
+			// Assert
+			(await crud.Get())[0].Other.Should().BeEquivalentTo(tModel2);
+		}
+
+		// IDK how to test this
+		// [Test]
+		public async Task Constructor_should_lazy_load_properties_if_not_included()
+		{
+			// Arrange
+			var tModel1 = new TestModel { Id = 1, Name = "Test", OtherId = 2 };
+			var tModel2 = new TestModel { Id = 2, Name = "Test", Other = tModel1, OtherId = 1 };
+			tModel1.Other = tModel2;
+			_dbContext.Add(tModel1);
+			_dbContext.Add(tModel2);
+			_dbContext.SaveChanges();
+
+			// Act
+			var crud = new Crud<TestModel>(_dbContext);
+
+			// Assert
+			var obj = await crud.Get(tModel1.GetPrimaryKey());
+			obj.Other.Should().BeNull();
+		}
+
+		#endregion
 
 		#region Create
 		[Test]
