@@ -44,10 +44,33 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 			_dbContext.SaveChanges();
 
 			// Act
-			var crud = new Crud<TestModel>(_dbContext, (t) => t.Other!);
+			var crud = new Crud<TestModel>(_dbContext, _dbContext.Set<TestModel>().Include(t => t.Other!));
 
 			// Assert
 			(await crud.Get())[0].Other.Should().BeEquivalentTo(tModel2);
+		}
+
+		[Test]
+		public async Task Constructor_should_eager_load_multiple_navigation_levels()
+		{
+			// Arrange
+			var tModel1 = new TestModel { Id = 1, Name = "Test", OtherId = 2 };
+			var tModel2 = new TestModel { Id = 2, Name = "Test", Other = tModel1, OtherId = 1 };
+			var testModel1 = new TestModel2 { Id = 1, Name = "Test", OtherId = 2, Model = tModel1, ModelId = 1 };
+			var testModel2 = new TestModel2 { Id = 2, Name = "Test", Other = testModel1, OtherId = 1, Model = tModel2, ModelId = 2 };
+			tModel1.Other = tModel2;
+			tModel1.Model = testModel1;
+			tModel2.Model = testModel2;
+			testModel1.Other = testModel2;
+			_dbContext.Add(tModel1); _dbContext.Add(tModel2);
+			_dbContext.Add(testModel1); _dbContext.Add(testModel2);
+			_dbContext.SaveChanges();
+
+			// Act
+			var crud = new Crud<TestModel>(_dbContext, _dbContext.Set<TestModel>().Include(t => t.Model!).ThenInclude(t => t.Other!));
+
+			// Assert
+			(await crud.Get(tModel1.GetPrimaryKey())).Other.Should().BeEquivalentTo(tModel2);
 		}
 
 		// IDK how to test this
@@ -532,8 +555,35 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		[ForeignKey(nameof(Other))]
 		public int? OtherId { get; set; }
 		public TestModel? Other { get; set; }
+
+		[ForeignKey(nameof(Model))]
+		public int ModelId { get; set; }
+		public TestModel2 Model { get; set; }
+
 		public TestModel() { }
 
+		public void AutoIncrementPrimaryKey()
+		=> Id = null;
+
+		public HashSet<Key> GetPrimaryKey()
+		=> new() { new(nameof(Id), Id) };
+
+		public void SetPrimaryKey(HashSet<Key> primaryKey)
+		=> Id = (int?)primaryKey.Single(x => x.Name == nameof(Id)).Value;
+	}
+
+	internal class TestModel2 : IModel
+	{
+		[Key]
+		public int? Id { get; set; }
+		public string? Name { get; set; }
+		[ForeignKey(nameof(Other))]
+		public int? OtherId { get; set; }
+		public TestModel2? Other { get; set; }
+		[ForeignKey(nameof(Model))]
+		public int ModelId { get; set; }
+		public TestModel? Model { get; set; }
+		public TestModel2() { }
 
 		public void AutoIncrementPrimaryKey()
 		=> Id = null;

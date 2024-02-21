@@ -17,15 +17,15 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 
 		private DbSet<T> DbSet { get; init; }
 
-		private IQueryable<T> EagerLoadedSet { get; init; }
+		private IIncludableQueryable<T, object>? EagerLoadedSet { get; init; }
 
 		/// <summary> Initializes a new instance of the <see cref="Crud{T}"/> class. </summary>
 		/// <param name="dbContext">The DbContext used for database operations.</param>
-		public Crud(DbContext dbContext, params Expression<Func<T, object>>[] navigationPropertyPath) 
+		public Crud(DbContext dbContext, IIncludableQueryable<T, object>? eagerLoad = null) 
 		{  
 			DbContext = dbContext;
 			DbSet = DbContext.Set<T>();
-			EagerLoadedSet = navigationPropertyPath.Aggregate(DbSet as IQueryable<T>, (current, path) => current.Include(path));
+			EagerLoadedSet = eagerLoad;
 		}
 
 		#region Create
@@ -64,7 +64,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		#region Read
 
 		/// <summary> Gets all objects from the database. </summary>
-		public async Task<T[]> Get() => await EagerLoadedSet.ToArrayAsync();
+		public async Task<T[]> Get() => EagerLoadedSet is not null ? await EagerLoadedSet.ToArrayAsync() : await DbSet.ToArrayAsync();
 
 		/// <summary> Gets an object from the database by its primary key. </summary>
 		/// <param name="key">The primary key of the object to get.</param>
@@ -92,7 +92,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		/// <param name="filter">The function to filter the entities.</param>
 		/// <returns> The objects that fit the filter criteria. </returns>
 		public async Task<T[]> Get(Func<T, bool> filter)
-		=> await Task.FromResult(EagerLoadedSet.Where(filter).ToArray());
+		=> await Task.FromResult(EagerLoadedSet is not null ? EagerLoadedSet.Where(filter).ToArray() : DbSet.Where(filter).ToArray());
 		#endregion
 
 		#region Update
@@ -145,7 +145,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 				return false;
 			}
 
-			DbSet.RemoveRange(objs);
+			DbSet.RemoveRange(objs!);
 			try
 			{
 				await DbContext.SaveChangesAsync();
