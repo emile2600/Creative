@@ -3,6 +3,7 @@ using Creative.Api.Exceptions;
 using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Creative.Api.Implementations.EntityFrameworkCore
 {
@@ -94,7 +95,7 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 		#endregion
 
 		#region Update
-		/// <inh
+		/// <inheritdoc/>
 		public async Task<T[]> Update(params T[] objs)
 		=> await Task.WhenAll(objs.Select(async obj => await Update(obj)));
 
@@ -104,18 +105,23 @@ namespace Creative.Api.Implementations.EntityFrameworkCore
 			var orignalObj = await Get(obj.GetPrimaryKey());
 			foreach (var property in obj.GetType().GetProperties())
 			{
+				// Skip properties that are not mapped to the database
+				if (Attribute.IsDefined(property, typeof(NotMappedAttribute))) continue;
 				try
 				{
+					// If the property is a value, update the value (think of int's , string's, etc.)
 					DbContext.Entry(orignalObj).Property(property.Name).CurrentValue = property.GetValue(obj);
 				}
 				catch (InvalidOperationException)
 				{
 					try
 					{
+						// If the property is a reference, update the reference (think of objects)
 						DbContext.Entry(orignalObj).Reference(property.Name).CurrentValue = property.GetValue(obj);
 					}
 					catch(InvalidOperationException)
 					{
+						// If the property is a collection, update the collection (think of lists, arrays, etc.)
 						DbContext.Entry(orignalObj).Collection(property.Name).CurrentValue = (IEnumerable?)property.GetValue(obj);
 					}
 				}
