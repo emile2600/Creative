@@ -3,6 +3,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Version>1.2.0</Version>
+    <Company>Creative</Company>
+    <Authors>emile2600</Authors>
+    <Title>Database Factory</Title>
+    <RepositoryUrl>https://github.com/emile2600/Creative/tree/main/Database</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
